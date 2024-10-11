@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, Detail, getPreferenceValues, open, showInFinder } from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, showInFinder } from "@raycast/api";
 import { useState } from "react";
 import fs from 'fs';
 import path from "path";
@@ -13,7 +13,7 @@ const DEFAULT_PATH = `index.md`
 const PAGE_SEPARATOR = '---'
 const PLACEHOLDER_TEXT = 'No Markdown slides found. Create a new markdown file at '
 
-function openFile(filePath: string, finder = false) {
+function editFile(filePath: string, finder = false) {
   const dir = preferences.slidesDirectory?.replace('~', process.env.HOME || '');
   if (dir && !fs.existsSync(dir)) {
     try {
@@ -24,10 +24,9 @@ function openFile(filePath: string, finder = false) {
     }
   }
 
-  const fullPath = dir + '/' + filePath
-  if (!fs.existsSync(fullPath)) {
+  if (!fs.existsSync(filePath)) {
     try {
-      fs.writeFileSync(fullPath, "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
+      fs.writeFileSync(filePath, "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
     } catch (error) {
       console.error("Error writing file:", error);
       return;
@@ -35,9 +34,9 @@ function openFile(filePath: string, finder = false) {
   }
 
   if (finder) {
-    showInFinder(fullPath);
+    showInFinder(filePath);
   } else {
-    open(fullPath);
+    open(filePath);
   }
 }
 
@@ -56,16 +55,16 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
         <ActionPanel>
           {!slide.includes(PLACEHOLDER_TEXT) && (
             <ActionPanel.Section title="Navigate">
-              <Action title="Next" shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
-              <Action title="Previous" shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
-              <Action title="Beginning" shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
-              <Action title="End" shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
+              <Action title="Next" icon={Icon.ArrowRight} shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
+              <Action title="Previous" icon={Icon.ArrowLeft} shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
+              <Action title="Beginning" icon={Icon.ArrowLeftCircle} shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
+              <Action title="End" icon={Icon.ArrowRightCircle} shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
             </ActionPanel.Section>
           )}
-         <Action title="Edit" shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => openFile(filePath)} />
-         <Action.ShowInFinder path={path.join(preferences.slidesDirectory, filePath)} />
-         <Action.OpenWith path={path.join(preferences.slidesDirectory, filePath)} />
-
+          <Action title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => editFile(filePath)} />
+          <Action.ShowInFinder path={path.join(preferences.slidesDirectory, filePath)} />
+          <Action.OpenWith path={path.join(preferences.slidesDirectory, filePath)} />
+          <Action title="Select File" onAction={() => launchCommand({ name: "select-markdown-presentation", type: LaunchType.UserInitiated })} />
         </ActionPanel>
       }
     />
@@ -75,7 +74,8 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
 
 
 export default function Command({ launchContext }: { launchContext: { file?: string }}) {
-  const selectedFilePath = preferences.slidesDirectory + '/' + (launchContext?.file || cache.get("items") || DEFAULT_PATH)
+  const selectedFilePath = preferences.slidesDirectory + '/' + (launchContext?.file || cache.get("selectedSlides") || DEFAULT_PATH)
+  console.log(selectedFilePath, cache.get("selectedSlides"))
   let markdown =  PLACEHOLDER_TEXT + selectedFilePath;
   try {
     markdown = fs.readFileSync(selectedFilePath, "utf-8")
@@ -101,5 +101,10 @@ export default function Command({ launchContext }: { launchContext: { file?: str
     }
   };
 
-  return <Slide slide={slides[currentSlide]} nextSlide={nextSlide} prevSlide={prevSlide} filePath={DEFAULT_PATH} />;
+  return <Slide 
+    slide={slides[currentSlide]} 
+    nextSlide={nextSlide} 
+    prevSlide={prevSlide} 
+    filePath={selectedFilePath} 
+  />;
 }

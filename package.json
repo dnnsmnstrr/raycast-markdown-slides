@@ -23,7 +23,14 @@
       "description": "Searches the slides directory for markdown files and presents a list of available presentations",
       "mode": "view"
     }
-  ],
+  ,
+    {
+      "name": "create-markdown-presentation",
+      "title": "Create Markdown Presentation",
+      "description": "Create a new markdown file with a slides template",
+      "mode": "view"
+    }
+      ],
   "preferences": [
     {
       "name": "slidesDirectory",
