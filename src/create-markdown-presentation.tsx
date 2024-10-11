@@ -20,7 +20,12 @@ export default function Command() {
     const fileName = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
     const filePath = path.join(preferences.slidesDirectory.replace("~", process.env.HOME || ""), fileName);
 
-    const content = `# ${title}\n\n${firstPage}\n\n---\n\nNew Page`;
+    let content;
+    if (firstPage.startsWith("#") || firstPage.startsWith("---")) {
+      content = firstPage;
+    } else {
+      content = `# ${title}\n\n${firstPage}\n\n---\n\nNew Page`;
+    }
 
     try {
       fs.writeFileSync(filePath, content);

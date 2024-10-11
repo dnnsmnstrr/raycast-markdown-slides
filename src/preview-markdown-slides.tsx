@@ -79,6 +79,13 @@ export default function Command({ launchContext }: { launchContext: { file?: str
   let markdown =  PLACEHOLDER_TEXT + selectedFilePath;
   try {
     markdown = fs.readFileSync(selectedFilePath, "utf-8")
+    // Strip potential frontmatter
+    if (markdown.startsWith("---")) {
+      const endOfFrontmatter = markdown.indexOf("---", 3);
+      if (endOfFrontmatter !== -1) {
+        markdown = markdown.slice(endOfFrontmatter + 3).trim();
+      }
+    }
   } catch (error) {
     console.log(error)
   }
