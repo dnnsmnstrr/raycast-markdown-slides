@@ -13,7 +13,7 @@
     {
       "name": "preview-markdown-slides",
       "title": "Preview Markdown Slides",
-      "description": "View a preview of the selected markdown slide presentation",
+      "description": "View a preview of the selected markdown slide presentation content",
       "mode": "view"
     }
   ,
@@ -39,6 +39,24 @@
       "type": "directory",
       "required": false,
       "default": "~/slides"
+    },
+    {
+      "name": "pageSeparator",
+      "title": "Page Separator",
+      "description": "The separator used to divide slides in your markdown files",
+      "type": "dropdown",
+      "required": false,
+      "default": "---",
+      "data": [
+        {
+          "title": "Horizontal Ruler (---)",
+          "value": "---"
+        },
+        {
+          "title": "New lines (\\n\\n)",
+          "value": "\n\n"
+        }
+      ]
     }
   ],
   "dependencies": {
