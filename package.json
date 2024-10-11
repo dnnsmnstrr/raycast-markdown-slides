@@ -13,8 +13,25 @@
     {
       "name": "preview-markdown-slides",
       "title": "Preview Markdown Slides",
-      "description": "View a rendered preview of a markdown slide presentation",
+      "description": "View a preview of the selected markdown slide presentation",
       "mode": "view"
+    }
+  ,
+    {
+      "name": "select-markdown-presentation",
+      "title": "Select Markdown Presentation",
+      "description": "Searches the slides directory for markdown files and presents a list of available presentations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "slidesDirectory",
+      "title": "Slides Directory",
+      "description": "The path where your markdown presentations are stored",
+      "type": "directory",
+      "required": false,
+      "default": "~/slides"
     }
   ],
   "dependencies": {

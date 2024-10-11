@@ -1,16 +1,21 @@
-import { Action, ActionPanel, Detail, open, showInFinder } from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, getPreferenceValues, open, showInFinder } from "@raycast/api";
 import { useState } from "react";
 import fs from 'fs';
-import path from 'path';
+import path from "path";
 
-const DEFAULT_PATH = `${process.env.HOME}/slides/index.md`
+interface Preferences {
+  slidesDirectory: string;
+}
+const preferences = getPreferenceValues<Preferences>();
+const cache = new Cache();
+
+const DEFAULT_PATH = `index.md`
 const PAGE_SEPARATOR = '---'
-
-
+const PLACEHOLDER_TEXT = 'No Markdown slides found. Create a new markdown file at '
 
 function openFile(filePath: string, finder = false) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
+  const dir = preferences.slidesDirectory?.replace('~', process.env.HOME || '');
+  if (dir && !fs.existsSync(dir)) {
     try {
       fs.mkdirSync(dir, { recursive: true });
     } catch (error) {
@@ -19,9 +24,10 @@ function openFile(filePath: string, finder = false) {
     }
   }
 
-  if (!fs.existsSync(filePath)) {
+  const fullPath = dir + '/' + filePath
+  if (!fs.existsSync(fullPath)) {
     try {
-      fs.writeFileSync(filePath, "# New Presentation\n\nStart writing your slides here.");
+      fs.writeFileSync(fullPath, "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
     } catch (error) {
       console.error("Error writing file:", error);
       return;
@@ -29,9 +35,9 @@ function openFile(filePath: string, finder = false) {
   }
 
   if (finder) {
-    showInFinder(filePath);
+    showInFinder(fullPath);
   } else {
-    open(filePath);
+    open(fullPath);
   }
 }
 
@@ -48,24 +54,31 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
       markdown={slide}
       actions={
         <ActionPanel>
-         <ActionPanel.Section title="Navigate">
-          <Action title="Next" shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
-          <Action title="Previous" shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
-          <Action title="Beginning" shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
-          <Action title="End" shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
-         </ActionPanel.Section>
-         <Action title="Open in Finder" shortcut={{ modifiers: ['cmd'], key: "o" }} onAction={() => openFile(filePath)} />
-         <Action title="Edit Source" shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => openFile(filePath)} />
+          {!slide.includes(PLACEHOLDER_TEXT) && (
+            <ActionPanel.Section title="Navigate">
+              <Action title="Next" shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
+              <Action title="Previous" shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
+              <Action title="Beginning" shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
+              <Action title="End" shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
+            </ActionPanel.Section>
+          )}
+         <Action title="Edit" shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => openFile(filePath)} />
+         <Action.ShowInFinder path={path.join(preferences.slidesDirectory, filePath)} />
+         <Action.OpenWith path={path.join(preferences.slidesDirectory, filePath)} />
+
         </ActionPanel>
       }
     />
   );
 }
 
-export default function Command() {
-  let markdown =  "No Markdown slides found. Place your content at `~/slides/index.md`";
+
+
+export default function Command({ launchContext }: { launchContext: { file?: string }}) {
+  const selectedFilePath = preferences.slidesDirectory + '/' + (launchContext?.file || cache.get("items") || DEFAULT_PATH)
+  let markdown =  PLACEHOLDER_TEXT + selectedFilePath;
   try {
-    markdown = fs.readFileSync(DEFAULT_PATH, "utf-8")
+    markdown = fs.readFileSync(selectedFilePath, "utf-8")
   } catch (error) {
     console.log(error)
   }
