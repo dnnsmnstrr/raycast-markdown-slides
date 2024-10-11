@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Cache, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, showInFinder } from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, showInFinder, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import fs from 'fs';
+import { Marp } from '@marp-team/marp-core';
 
 interface Preferences {
   slidesDirectory: string;
@@ -51,6 +52,36 @@ interface SlideProps {
   prevSlide: (skip?: boolean) => void;
 }
 
+function generateHtmlSlides(markdown: string): string {
+  
+  const marp = new Marp({
+    html: true,
+    markdown: {
+      breaks: true,
+    },
+  });
+  
+  const { html, css } = marp.render(markdown)
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>${css}</style>
+</head>
+<body>
+  ${html}
+</body>
+</html>
+  `;
+}
+
+function saveAndOpenHtml(html: string, filePath: string) {
+  const htmlPath = filePath.replace('.md', '.html');
+  fs.writeFileSync(htmlPath, html);
+  open(htmlPath);
+}
+
 function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
   return (
     <Detail
@@ -69,6 +100,15 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
           <Action.ShowInFinder path={filePath} />
           <Action.OpenWith path={filePath} />
           <Action title="Select File" icon={Icon.Folder} shortcut={{ modifiers: ['cmd'], key: "f" }} onAction={() => launchCommand({ name: "select-markdown-presentation", type: LaunchType.UserInitiated })} />
+          <Action 
+            title="Open in Browser" 
+            icon={Icon.Globe} 
+            shortcut={{ modifiers: ['cmd'], key: "b" }} 
+            onAction={() => {
+              const html = generateHtmlSlides(fs.readFileSync(filePath, 'utf-8'));
+              saveAndOpenHtml(html, filePath);
+            }} 
+          />
         </ActionPanel>
       }
     />

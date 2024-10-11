@@ -4,11 +4,14 @@ import path from "path";
 
 type Values = {
   title: string;
-  firstPage: string;
+  content: string;
+  theme: string;
+  paginate: boolean;
 };
 
 interface Preferences {
   slidesDirectory: string;
+  pageSeparator: string;
 }
 
 const preferences = getPreferenceValues<Preferences>();
@@ -16,15 +19,12 @@ const cache = new Cache();
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    const { title, firstPage } = values;
+    let { title, content, theme, paginate } = values;
     const fileName = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
     const filePath = path.join(preferences.slidesDirectory.replace("~", process.env.HOME || ""), fileName);
 
-    let content;
-    if (firstPage.startsWith("#") || firstPage.startsWith("---")) {
-      content = firstPage;
-    } else {
-      content = `# ${title}\n\n${firstPage}\n\n---\n\nNew Page`;
+    if (!content.startsWith("---")) {
+      content = `---\ntheme: ${theme}\npaginate: ${paginate ? 'true' : 'false'}---\n\n` + content;
     }
 
     try {
@@ -48,7 +48,13 @@ export default function Command() {
     >
       <Form.Description text="Create a new markdown slides presentation" />
       <Form.TextField id="title" title="Presentation Title" placeholder="Enter presentation title" />
-      <Form.TextArea id="firstPage" title="First Page Content" placeholder="Enter content for the first page" />
+      <Form.TextArea id="content" title="Content" placeholder="Enter content" info={"Pages are separated by " + (preferences.pageSeparator === '---' ? 'horizontal rule (---)' : 'two line breaks')} />
+      <Form.Dropdown id="theme" title="Theme" defaultValue="default">
+        <Form.Dropdown.Item value="default" title="Default" />
+        <Form.Dropdown.Item value="gaia" title="Gaia" />
+        <Form.Dropdown.Item value="uncover" title="Uncover" />
+      </Form.Dropdown>
+      <Form.Checkbox id="paginate" title="Paginate" label="Enable pagination of slides" />
     </Form>
   );
 }
