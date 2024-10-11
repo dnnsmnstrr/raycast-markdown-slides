@@ -3,12 +3,10 @@ import { useState } from "react";
 import fs from 'fs';
 import path from 'path';
 
-interface SlideProps {
-  slide: string;
-  filePath: string;
-  nextSlide: () => void;
-  prevSlide: () => void;
-}
+const DEFAULT_PATH = `${process.env.HOME}/slides/index.md`
+const PAGE_SEPARATOR = '---'
+
+
 
 function openFile(filePath: string, finder = false) {
   const dir = path.dirname(filePath);
@@ -37,6 +35,13 @@ function openFile(filePath: string, finder = false) {
   }
 }
 
+interface SlideProps {
+  slide: string;
+  filePath: string;
+  nextSlide: (skip?: boolean) => void;
+  prevSlide: (skip?: boolean) => void;
+}
+
 function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
   return (
     <Detail
@@ -45,7 +50,9 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
         <ActionPanel>
          <ActionPanel.Section title="Navigate">
           <Action title="Next" shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
-          <Action title="Prev" shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
+          <Action title="Previous" shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
+          <Action title="Beginning" shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
+          <Action title="End" shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
          </ActionPanel.Section>
          <Action title="Open in Finder" shortcut={{ modifiers: ['cmd'], key: "o" }} onAction={() => openFile(filePath)} />
          <Action title="Edit Source" shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => openFile(filePath)} />
@@ -54,9 +61,6 @@ function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
     />
   );
 }
-
-const DEFAULT_PATH = `${process.env.HOME}/slides/index.md`
-const PAGE_SEPARATOR = '---'
 
 export default function Command() {
   let markdown =  "No Markdown slides found. Place your content at `~/slides/index.md`";
@@ -68,14 +72,18 @@ export default function Command() {
   const slides = markdown.split(PAGE_SEPARATOR);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const nextSlide = () => {
-    if (currentSlide < slides.length - 1) {
+  const nextSlide = (skip = false) => {
+    if (skip) {
+      setCurrentSlide(slides.length - 1);
+    } else if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     }
   };
 
-  const prevSlide = () => {
-    if (currentSlide > 0) {
+  const prevSlide = (skip = false) => {
+    if (skip) {
+      setCurrentSlide(0);
+    } else if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1);
     }
   };
