@@ -24,7 +24,7 @@ export default function Command() {
     const filePath = path.join(preferences.slidesDirectory.replace("~", process.env.HOME || ""), fileName);
 
     if (!content.startsWith("---")) {
-      content = `---\ntheme: ${theme}\npaginate: ${paginate ? 'true' : 'false'}\n---\n\n` + content;
+      content = `---\nmarp:true\ntheme: ${theme}\npaginate: ${paginate ? 'true' : 'false'}\n---\n\n` + content;
     }
 
     try {

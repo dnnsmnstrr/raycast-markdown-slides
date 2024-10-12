@@ -29,8 +29,49 @@
       "title": "Create Markdown Presentation",
       "description": "Create a new markdown file with a slides template",
       "mode": "view"
+    },
+    {
+      "name": "generate-markdown-slides",
+      "title": "Generate Markdown Slides",
+      "description": "Creates a markdown-based presentation about a given topic",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "topic",
+          "type": "text",
+          "placeholder": "Topic",
+          "required": true
+        },
+        {
+          "name": "creativity",
+          "type": "dropdown",
+          "placeholder": "Creativity",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+                "title": "Low",
+                "value": "low"
+            },
+            {
+                "title": "Medium",
+                "value": "medium"
+            },
+            {
+                "title": "High",
+                "value": "high"
+            },
+            {
+                "title": "Maximum",
+                "value": "maximum"
+            }      
+          ]
+        }
+      ]  
     }
-      ],
+  ],
   "preferences": [
     {
       "name": "slidesDirectory",
