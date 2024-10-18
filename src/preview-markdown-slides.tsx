@@ -47,6 +47,7 @@ function parseMarkdownToSlides(markdown: string): string[] {
 
 interface SlideProps {
   slide: string;
+  slides: string[];
   filePath: string;
   nextSlide: (skip?: boolean) => void;
   prevSlide: (skip?: boolean) => void;
@@ -82,13 +83,13 @@ function saveAndOpenHtml(html: string, filePath: string) {
   open(htmlPath);
 }
 
-function Slide({ slide, nextSlide, prevSlide, filePath }: SlideProps) {
+function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
   return (
     <Detail
       markdown={slide}
       actions={
         <ActionPanel>
-          {!slide.includes(PLACEHOLDER_TEXT) && (
+          {!slide.includes(PLACEHOLDER_TEXT) && slides.length > 1 && (
             <ActionPanel.Section title="Navigate">
               <Action title="Next" icon={Icon.ArrowRight} shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
               <Action title="Previous" icon={Icon.ArrowLeft} shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
@@ -150,7 +151,8 @@ export default function Command({ launchContext }: { launchContext: { file?: str
   };
 
   return <Slide 
-    slide={slides[currentSlide]} 
+    slide={slides[currentSlide]}
+    slides={slides}
     nextSlide={nextSlide} 
     prevSlide={prevSlide} 
     filePath={selectedFilePath} 
