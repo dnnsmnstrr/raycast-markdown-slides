@@ -1,13 +1,10 @@
 # Markdown Slides
 
-Preview a markdown presentation
+Create and Preview markdown presentations in the [marp-format](https://marpit.marp.app/?id=how-to-use).
 
-Original Credits to https://gist.github.com/MarcoIeni/d89c79704a9bb62b004b0f0d0a9b9bc6
+Available [themes](https://github.com/marp-team/marp-core/blob/main/themes/README.md):
+- default
+- gaia
+- uncover
 
-
-## Todo
-
-- [ ] custom separator
-- [ ] inline editing with form
-- [ ] generate presentation with [marp](https://marpit.marp.app/?id=how-to-use)
-- [ ] create presentation with Raycast AI
+Original Credits: https://gist.github.com/MarcoIeni/d89c79704a9bb62b004b0f0d0a9b9bc6
