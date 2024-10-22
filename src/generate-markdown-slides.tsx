@@ -20,7 +20,7 @@ const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GenerateMarkdownSlides }>) {
-  const PAGE_SEPARATOR = preferences.pageSeparator === 'newline' ? '\n\n\n' : '---';
+  const PAGE_SEPARATOR = preferences.pageSeparator === "newline" ? "\n\n\n" : "---";
 
   const PROMPT = `Generate a presentation in markdown format about the topic: "${props.arguments.topic}". Each slide should be separated by a ${preferences.pageSeparator} (${PAGE_SEPARATOR}). Include the following elements in the presentation:
   
