@@ -47,9 +47,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
 
   function createSlides() {
     const fileName = `${props.arguments.topic.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
-    const filePath = path.join(preferences.slidesDirectory.replace("~", process.env.HOME || ""), fileName);
+    const dir = preferences.slidesDirectory.replace("~", process.env.HOME || "")
+    const filePath = path.join(dir, fileName);
 
     try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
       fs.writeFileSync(filePath, data);
       cache.set("selectedSlides", fileName);
       launchCommand({ name: "preview-markdown-slides", type: LaunchType.UserInitiated, context: { file: fileName } });

@@ -28,6 +28,10 @@ function createSlidesFile(values: CreateFormValues) {
   }
 
   try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(filePath, content);
     cache.set("selectedSlides", fileName);
     launchCommand({ name: "preview-markdown-slides", type: LaunchType.UserInitiated, context: { file: fileName } });

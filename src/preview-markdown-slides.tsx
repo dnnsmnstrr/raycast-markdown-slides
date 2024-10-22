@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, closeMainWindow, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, popToRoot, showInFinder, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import fs from 'fs';
 import { Marp } from '@marp-team/marp-core';
@@ -16,18 +16,12 @@ const PLACEHOLDER_TEXT = 'No Markdown slides found. Create a new markdown file a
 
 function editFile(filePath: string, finder = false) {
   const dir = preferences.slidesDirectory?.replace('~', process.env.HOME || '');
-  if (dir && !fs.existsSync(dir)) {
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-    } catch (error) {
-      console.error("Error creating directory:", error);
-      return;
-    }
-  }
-
   if (!fs.existsSync(filePath)) {
     try {
-      fs.writeFileSync(filePath, "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(filePath.replace('~', process.env.HOME || ''), "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
     } catch (error) {
       console.error("Error writing file:", error);
       return;
@@ -39,6 +33,7 @@ function editFile(filePath: string, finder = false) {
   } else {
     open(filePath);
   }
+  popToRoot()
 }
 
 function parseMarkdownToSlides(markdown: string): string[] {
@@ -97,7 +92,7 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
               <Action title="End" icon={Icon.ArrowRightCircle} shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
             </ActionPanel.Section>
           )}
-          <Action title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => editFile(filePath)} />
+          <Action title={!slide.includes(PLACEHOLDER_TEXT) ? "Edit" : "Create"} icon={Icon.Pencil} shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => editFile(filePath)} />
           <Action.ShowInFinder path={filePath} />
           <Action.OpenWith path={filePath} />
           <Action title="Select File" icon={Icon.Folder} shortcut={{ modifiers: ['cmd'], key: "f" }} onAction={() => launchCommand({ name: "select-markdown-presentation", type: LaunchType.UserInitiated })} />
@@ -130,6 +125,11 @@ export default function Command({ launchContext }: { launchContext: { file?: str
     }
   } catch (error) {
     console.log(error)
+    showToast({
+      style: Toast.Style.Failure,
+      title: "File not found",
+      message: "Tried to open file at: " + selectedFilePath,
+    });
   }
   const slides = parseMarkdownToSlides(markdown);
   const [currentSlide, setCurrentSlide] = useState(0);
