@@ -1,4 +1,17 @@
-import { Action, ActionPanel, AI, Cache, Detail, getPreferenceValues, Icon, launchCommand, LaunchProps, LaunchType, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  AI,
+  Cache,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchProps,
+  LaunchType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
@@ -41,13 +54,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
 
 	1.	Reference 1
 	2.	Reference 2
-  `
+  `;
 
-  const { data, isLoading } = useAI(PROMPT, { creativity: props.arguments.creativity || 1, model: AI.Model.OpenAI_GPT4o });
+  const { data, isLoading } = useAI(PROMPT, {
+    creativity: props.arguments.creativity || 1,
+    model: AI.Model.OpenAI_GPT4o,
+  });
 
   function createSlides() {
     const fileName = `${props.arguments.topic.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.md`;
-    const dir = preferences.slidesDirectory.replace("~", process.env.HOME || "")
+    const dir = preferences.slidesDirectory.replace("~", process.env.HOME || "");
     const filePath = path.join(dir, fileName);
 
     try {
@@ -63,8 +79,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
       showToast({ title: "Error", message: "Failed to create presentation", style: Toast.Style.Failure });
     }
   }
-  return <Detail isLoading={isLoading} markdown={data} actions={<ActionPanel title="#1 in raycast/extensions">
-    <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
-    <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }}/>
-  </ActionPanel>} />;
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel title="#1 in raycast/extensions">
+          <Action title="Create Presentation" onAction={createSlides} icon={Icon.NewDocument} />
+          <Action.CopyToClipboard content={data} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        </ActionPanel>
+      }
+    />
+  );
 }

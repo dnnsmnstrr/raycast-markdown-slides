@@ -1,7 +1,21 @@
-import { Action, ActionPanel, Cache, closeMainWindow, Detail, getPreferenceValues, Icon, launchCommand, LaunchType, open, popToRoot, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Cache,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  open,
+  popToRoot,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
-import fs from 'fs';
-import { Marp } from '@marp-team/marp-core';
+import fs from "fs";
+import { Marp } from "@marp-team/marp-core";
 
 interface Preferences {
   slidesDirectory: string;
@@ -10,18 +24,21 @@ interface Preferences {
 const preferences = getPreferenceValues<Preferences>();
 const cache = new Cache();
 
-const DEFAULT_PATH = `index.md`
+const DEFAULT_PATH = `index.md`;
 const PAGE_SEPARATOR = preferences.pageSeparator;
-const PLACEHOLDER_TEXT = 'No Markdown slides found. Create a new markdown file at '
+const PLACEHOLDER_TEXT = "No Markdown slides found. Create a new markdown file at ";
 
 function editFile(filePath: string, finder = false) {
-  const dir = preferences.slidesDirectory?.replace('~', process.env.HOME || '');
+  const dir = preferences.slidesDirectory?.replace("~", process.env.HOME || "");
   if (!fs.existsSync(filePath)) {
     try {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(filePath.replace('~', process.env.HOME || ''), "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page");
+      fs.writeFileSync(
+        filePath.replace("~", process.env.HOME || ""),
+        "# New Presentation\n\nStart writing your slides here.\n\n---\n\nNew Page",
+      );
     } catch (error) {
       console.error("Error writing file:", error);
       return;
@@ -33,7 +50,7 @@ function editFile(filePath: string, finder = false) {
   } else {
     open(filePath);
   }
-  popToRoot()
+  popToRoot();
 }
 
 function parseMarkdownToSlides(markdown: string): string[] {
@@ -49,15 +66,14 @@ interface SlideProps {
 }
 
 function generateHtmlSlides(markdown: string): string {
-  
   const marp = new Marp({
     html: true,
     markdown: {
       breaks: true,
     },
   });
-  
-  const { html, css } = marp.render(markdown)
+
+  const { html, css } = marp.render(markdown);
 
   return `
 <!DOCTYPE html>
@@ -73,7 +89,7 @@ function generateHtmlSlides(markdown: string): string {
 }
 
 function saveAndOpenHtml(html: string, filePath: string) {
-  const htmlPath = filePath.replace('.md', '.html');
+  const htmlPath = filePath.replace(".md", ".html");
   fs.writeFileSync(htmlPath, html);
   open(htmlPath);
 }
@@ -86,24 +102,54 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
         <ActionPanel>
           {!slide.includes(PLACEHOLDER_TEXT) && slides.length > 1 && (
             <ActionPanel.Section title="Navigate">
-              <Action title="Next" icon={Icon.ArrowRight} shortcut={{ modifiers: [], key: "arrowRight" }} onAction={() => nextSlide()} />
-              <Action title="Previous" icon={Icon.ArrowLeft} shortcut={{ modifiers: [], key: "arrowLeft" }} onAction={() => prevSlide()} />
-              <Action title="Beginning" icon={Icon.ArrowLeftCircle} shortcut={{ modifiers: ['cmd'], key: "arrowLeft" }} onAction={() => prevSlide(true)} />
-              <Action title="End" icon={Icon.ArrowRightCircle} shortcut={{ modifiers: ['cmd'], key: "arrowRight" }} onAction={() => nextSlide(true)} />
+              <Action
+                title="Next"
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: [], key: "arrowRight" }}
+                onAction={() => nextSlide()}
+              />
+              <Action
+                title="Previous"
+                icon={Icon.ArrowLeft}
+                shortcut={{ modifiers: [], key: "arrowLeft" }}
+                onAction={() => prevSlide()}
+              />
+              <Action
+                title="Beginning"
+                icon={Icon.ArrowLeftCircle}
+                shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                onAction={() => prevSlide(true)}
+              />
+              <Action
+                title="End"
+                icon={Icon.ArrowRightCircle}
+                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                onAction={() => nextSlide(true)}
+              />
             </ActionPanel.Section>
           )}
-          <Action title={!slide.includes(PLACEHOLDER_TEXT) ? "Edit" : "Create"} icon={Icon.Pencil} shortcut={{ modifiers: ['cmd'], key: "e" }} onAction={() => editFile(filePath)} />
+          <Action
+            title={!slide.includes(PLACEHOLDER_TEXT) ? "Edit" : "Create"}
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            onAction={() => editFile(filePath)}
+          />
           <Action.ShowInFinder path={filePath} />
           <Action.OpenWith path={filePath} />
-          <Action title="Select File" icon={Icon.Folder} shortcut={{ modifiers: ['cmd'], key: "f" }} onAction={() => launchCommand({ name: "select-markdown-presentation", type: LaunchType.UserInitiated })} />
-          <Action 
-            title="Open in Browser" 
-            icon={Icon.Globe} 
-            shortcut={{ modifiers: ['cmd'], key: "b" }} 
+          <Action
+            title="Select File"
+            icon={Icon.Folder}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={() => launchCommand({ name: "select-markdown-presentation", type: LaunchType.UserInitiated })}
+          />
+          <Action
+            title="Open in Browser"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
             onAction={() => {
-              const html = generateHtmlSlides(fs.readFileSync(filePath, 'utf-8'));
+              const html = generateHtmlSlides(fs.readFileSync(filePath, "utf-8"));
               saveAndOpenHtml(html, filePath);
-            }} 
+            }}
           />
         </ActionPanel>
       }
@@ -111,11 +157,12 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
   );
 }
 
-export default function Command({ launchContext }: { launchContext: { file?: string }}) {
-  const selectedFilePath = preferences.slidesDirectory + '/' + (launchContext?.file || cache.get("selectedSlides") || DEFAULT_PATH)
-  let markdown =  PLACEHOLDER_TEXT + selectedFilePath;
+export default function Command({ launchContext }: { launchContext: { file?: string } }) {
+  const selectedFilePath =
+    preferences.slidesDirectory + "/" + (launchContext?.file || cache.get("selectedSlides") || DEFAULT_PATH);
+  let markdown = PLACEHOLDER_TEXT + selectedFilePath;
   try {
-    markdown = fs.readFileSync(selectedFilePath, "utf-8")
+    markdown = fs.readFileSync(selectedFilePath, "utf-8");
     // Strip potential frontmatter
     if (markdown.startsWith("---")) {
       const endOfFrontmatter = markdown.indexOf("---", 3);
@@ -124,7 +171,7 @@ export default function Command({ launchContext }: { launchContext: { file?: str
       }
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     showToast({
       style: Toast.Style.Failure,
       title: "File not found",
@@ -150,11 +197,13 @@ export default function Command({ launchContext }: { launchContext: { file?: str
     }
   };
 
-  return <Slide 
-    slide={slides[currentSlide]}
-    slides={slides}
-    nextSlide={nextSlide} 
-    prevSlide={prevSlide} 
-    filePath={selectedFilePath} 
-  />;
+  return (
+    <Slide
+      slide={slides[currentSlide]}
+      slides={slides}
+      nextSlide={nextSlide}
+      prevSlide={prevSlide}
+      filePath={selectedFilePath}
+    />
+  );
 }
