@@ -81,11 +81,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateFormValu
       }
     >
       <Form.Description text="Create a new markdown slides presentation" />
-      <Form.TextField
-        title="Title"
-        placeholder="Enter presentation title"
-        {...itemProps.title}
-      />
+      <Form.TextField title="Title" placeholder="Enter presentation title" {...itemProps.title} />
       <Form.TextArea
         title="Content"
         placeholder="Enter content"

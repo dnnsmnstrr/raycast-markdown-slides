@@ -47,7 +47,7 @@ async function editFile(filePath: string, finder = false) {
   if (finder) {
     showInFinder(filePath);
   } else {
-    const application = await getDefaultApplication(filePath)
+    const application = await getDefaultApplication(filePath);
     open(filePath, application);
   }
   popToRoot();
@@ -160,9 +160,9 @@ function Slide({ slide, slides, nextSlide, prevSlide, filePath }: SlideProps) {
 export default function Command({ launchContext }: { launchContext: { file?: string } }) {
   const selectedFilePath =
     preferences.slidesDirectory + "/" + (launchContext?.file || cache.get("selectedSlides") || DEFAULT_PATH);
-  const [markdown, setMarkdown] = useState<string | null>('')
-  const [showPagination, setShowPagination] = useState(false)
-  const [slides, setSlides] = useState<string[]>([''])
+  const [markdown, setMarkdown] = useState<string | null>("");
+  const [showPagination, setShowPagination] = useState(false);
+  const [slides, setSlides] = useState<string[]>([""]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -170,16 +170,16 @@ export default function Command({ launchContext }: { launchContext: { file?: str
       let markdownContent = fs.readFileSync(selectedFilePath, "utf-8");
       // Strip potential frontmatter
       if (markdownContent.startsWith("---")) {
-        if (markdownContent.includes('paginate: true')) {
-          setShowPagination(true)
+        if (markdownContent.includes("paginate: true")) {
+          setShowPagination(true);
         }
         const endOfFrontmatter = markdownContent.indexOf("---", 3);
         if (endOfFrontmatter !== -1) {
           markdownContent = markdownContent.slice(endOfFrontmatter + 3).trim();
         }
       }
-      console.log(markdownContent)
-      setMarkdown(markdownContent)
+      console.log(markdownContent);
+      setMarkdown(markdownContent);
     } catch (error) {
       console.log(error);
       showToast({
@@ -187,28 +187,26 @@ export default function Command({ launchContext }: { launchContext: { file?: str
         title: "File not found",
         message: "Tried to open file at: " + selectedFilePath,
       });
-      setMarkdown(null)
+      setMarkdown(null);
     }
   }, [selectedFilePath]);
 
   useEffect(() => {
     if (markdown) {
       const parsedSlides = parseMarkdownToSlides(markdown);
-      console.log(parsedSlides)
-      setSlides(parsedSlides)
-    } else if (markdown === null) (
-      setSlides([PLACEHOLDER_TEXT + selectedFilePath])
-    )
-  }, [markdown])
+      console.log(parsedSlides);
+      setSlides(parsedSlides);
+    } else if (markdown === null) setSlides([PLACEHOLDER_TEXT + selectedFilePath]);
+  }, [markdown]);
 
   useEffect(() => {
     if (showPagination) {
-      const pageNumber = currentSlide + 1
+      const pageNumber = currentSlide + 1;
       showToast({
-        title: "Slide " + pageNumber + '/' + slides.length,
+        title: "Slide " + pageNumber + "/" + slides.length,
       });
     }
-  }, [currentSlide])
+  }, [currentSlide]);
 
   const nextSlide = (skip = false) => {
     if (skip) {
