@@ -58,9 +58,9 @@ export function getMarkdownFiles(directory: string): Array<MarkdownFile> {
   const files = fs.readdirSync(directory);
   const markdownFiles = files.filter((file) => path.extname(file).toLowerCase() === ".md");
   const filesWithMetadata = markdownFiles.map((file) => {
-      const filePath = path.join(directory, file);
-      const fileStat = fs.statSync(filePath);
-      const creationTime = fileStat.birthtime;
+    const filePath = path.join(directory, file);
+    const fileStat = fs.statSync(filePath);
+    const creationTime = fileStat.birthtime;
     let content = fs.readFileSync(filePath, "utf8");
     let isPaginated = false;
     let icon = "";
@@ -89,7 +89,7 @@ export function getMarkdownFiles(directory: string): Array<MarkdownFile> {
       isPaginated,
       content,
       icon,
-      creationTime
+      creationTime,
     };
   });
   return filesWithMetadata;
